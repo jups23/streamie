@@ -186,19 +186,23 @@ require.def("stream/status",
             var className = "conversation"+con.index;
             window.location.hash = "#"+className;
             
-            // add some dynamic style to the page to hide everything besides this conversation
-            var style = '<style type="text/css">'+
-              'body.'+className+' #content #stream li {display:none;}\n'+
-              'body.'+className+' #content #stream li.'+className+' {display:block;}\n'+
-              '</style>';
-            style = $(style);
-            $("head").append(style);
+            if(!con.styleAppended) {
+              con.styleAppended = true;
+              // add some dynamic style to the page to hide everything besides this conversation
+              var style = '<style type="text/css" id>'+
+                'body.'+className+' #content #stream li {display:none;}\n'+
+                'body.'+className+' #content #stream li.'+className+' {display:block;}\n'+
+                '</style>';
+            
+                style = $(style);
+                $("head").append(style);
+            }
             
           })
         }
       },
       
-      // Double click on tweet text turns text into JSON;
+      // Double click on tweet text turns text into JSON; Hackability FTW!
       showJSON: {
         name: "showJSON",
         func: function (stream) {
@@ -206,11 +210,15 @@ require.def("stream/status",
             var p = $(this);
             var li = p.closest("li");
             var tweet = li.data("tweet");
-            var pre   = $("<pre />");
+            var pre   = $("<pre class='text'/>");
             tweet = _.clone(tweet);
             delete tweet.node; // chrome hates stringifying these;
             pre.text(JSON.stringify( tweet, null, " " ));
-            p.html("").append(pre);
+            p.hide().after(pre);
+            pre.bind("dblclick", function () {
+              pre.remove();
+              p.show();
+            });
           })
         }
       }
