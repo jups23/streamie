@@ -146,6 +146,27 @@ b,strong{font-weight:bold;}
 	}
 	#stream{
 		height:100%;
+
+    li.mention{
+      div.status{
+        background:#DEF4FF;
+      }
+    }
+    li.retweet{
+      div.status{
+        background:#FEFFE8;
+      }
+      .retweet-user-href-icon{
+        margin: 32px;
+      }
+    }
+    li.favorited{
+      div.status .action .favorite{
+				opacity:1;
+				color:#FFFF00;
+			}
+    }
+
 		li{
 			position:relative;
 			clear:both;
