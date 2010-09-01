@@ -36,7 +36,6 @@ require.def("stream/streamplugins",
           }
         }
       },
-<<<<<<< HEAD
       
       // marks a tweet whether we've ever seen it before using localStorage
       everSeen: {
@@ -54,9 +53,7 @@ require.def("stream/streamplugins",
         }
       },
       
-=======
 
->>>>>>> 9f36e9e696ee36007c72d79f309e4838e19c6284
       // find all mentions in a tweet. set tweet.mentioned to true if the current user was mentioned
       mentions: {
         name: "mentions",
@@ -160,31 +157,7 @@ require.def("stream/streamplugins",
         func: function (tweet) {
           tweet.created_at = new Date(tweet.data.created_at);
           function update () {
-<<<<<<< HEAD
-            var millis = (new Date()).getTime() - tweet.created_at.getTime();
-            
-            tweet.age = millis;
-            var units   = {
-              second: Math.round(millis/1000),
-              minute: Math.round(millis/1000/60),
-              hour:   Math.round(millis/1000/60/60),
-              day:    Math.round(millis/1000/60/60/24),
-              week:   Math.round(millis/1000/60/60/24/7),
-              month:  Math.round(millis/1000/60/60/24/30), // aproximately
-              year:   Math.round(millis/1000/60/60/24/365), // aproximately
-            };
-            var text = "";
-            for(var unit in units) { // hopefully nobody extends Object :) Should use Object.keys instead.
-              var val = units[unit];
-              if(val > 0) {
-                text = "";
-                text += val + " " + unit;
-                if(val > 1) text+="s "; // !i18n
-              }
-            };
-            
-            tweet.node.find(".created_at").text(text);
-=======
+
             tweet.age = (new Date()).getTime() - tweet.created_at.getTime();
             var age_str = '';
             var sec = Math.round(tweet.age / 1000);
@@ -197,7 +170,6 @@ require.def("stream/streamplugins",
 						age_str += sec + ' seconds '+'ago';
             tweet.node.find(".created_at").text(age_str)
 
->>>>>>> 9f36e9e696ee36007c72d79f309e4838e19c6284
           }
           update();
           setInterval(update, 5000)
