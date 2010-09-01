@@ -74,15 +74,17 @@ require.def("stream/initplugins",
           var dirty = win.scrollTop() > 0;
           var newCount = 0;
           function redraw() { // this should do away
-            var signal = newCount > 0 ? "[NEW] " : "";
-            document.title = document.title.replace(/^(?:\[NEW\] )*/, signal); 
+            var signal = newCount > 0 ? "("+newCount+") " : "";
+            document.title = document.title.replace(/^(?:\(\d+\) )*/, signal); 
           }
           win.bind("scroll", function () {
             dirty = win.scrollTop() > 0;
             if(!dirty) { // we scrolled to the top. Back to 0 unread
               newCount = 0;
-              redraw();
-              $(document).trigger("tweet:unread", [newCount])
+              setTimeout(function () { // not do this winthin the scroll event. Makes Chrome much happier performance wise.
+                redraw();
+                $(document).trigger("tweet:unread", [newCount])
+              }, 0);
             }
           });
           $(document).bind("tweet:new", function () {
@@ -190,7 +192,7 @@ require.def("stream/initplugins",
               if(status == "success") {
                 all = all.concat(tweets)
               };
-              if(returns == 4) { // all three APIs returned, we can start drawing
+              if(returns == 4) { // all four APIs returned, we can start drawing
                 var seen = {};
                 all = all.filter(function (tweet) { // filter out dupes
                   var ret = !seen[tweet.id];
