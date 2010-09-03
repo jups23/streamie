@@ -157,6 +157,38 @@ require.def("stream/streamplugins",
         }
       },
       
+			expandLinks: {
+			        name: 'expandLinks',
+			        func: function(tweet){
+			          tweet.node.find('.text a').each(function(index, link){
+			          if(link.href.length < 30 && link.href == $(link).text()){ //assume no shortener uses > 30 chrs
+			            $.getJSON('http://almaer.com/endpoint/resolver.php?callback=?',
+			              {url: link.href},
+			              function(url){
+											console.log("url.length = " + url.length);
+											if (url.length > 45) { //an URL with > 45 chars can break streamies tweet box layout
+								        console.log('O HAI');
+												lastAppearance = url.lastIndexOf("/");
+												console.log("lastAppearance " + lastAppearance);
+								        if (lastAppearance < 45 && lastAppearance > 7) {	//"http://".length == 7;
+								        	url = url.slice(0, lastAppearance); //generate friendlier URLs by slicing afer the last '/'
+													console.log("url: " + url);
+												}
+												else {
+													url = url.slice(0, 45);
+													url = url + "…";
+												}
+											}												
+											$(link).text(url);
+			                $(link).attr('title', link.href); //set title to old one.
+			                $(link).attr('href', url);
+			              })
+			            }
+			          });
+			          this();
+			        }
+			      },
+
       // calculate the age of the tweet and update it
       // tweet.created_at now includes an actual Date
       age: {
@@ -253,28 +285,7 @@ require.def("stream/streamplugins",
         }
       },
 			//unshortens links (based on @antimatter15's commit 936d9b06dff94a59cccd)
-			  expandLinks: {
-			  	name: 'expandLinks',
-		      func: function(tweet){		 		
-		        tweet.node.find('.text a').each(function(index, link){		 		
-		        if(link.href.length < 30){ //assume no shortener uses > 30 chrs		 		
-		          $.getJSON('http://almaer.com/endpoint/resolver.php?callback=?',
-		            {url: link.href},
-		            function(url){		               
-									if (url.lenght > 45) {	//an URL with > 45 chars can break streamies tweet box layout
-										lastAppearance = url.lastIndexOf("/");
-										if (lastAppearance) {
-											url = url.slice(0, lastAppearance); 
-											$(link).text(url);		 		
-					            $(link).attr('href', url);
-										}
-									}									
-		            })		 		
-		         }		 		
-		        });		 		
-		        this();		 		
-		      }		 		
-				}
+
 				      
     }  
 
