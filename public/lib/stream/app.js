@@ -33,6 +33,7 @@ require.def("stream/app",
       streamPlugin.prepend,
       streamPlugin.keepScrollState,
       streamPlugin.age,
+			streamPlugin.expandLinks,
       streamPlugin.newTweetEvent
     ];
     
