@@ -251,9 +251,32 @@ require.def("stream/streamplugins",
           }
           this();
         }
-      }
-      
-    }
-      
+      },
+			//unshortens links (based on @antimatter15's commit 936d9b06dff94a59cccd)
+			  expandLinks: {
+			  	name: 'expandLinks',
+		      func: function(tweet){		 		
+		        tweet.node.find('.text a').each(function(index, link){		 		
+		        if(link.href.length < 30){ //assume no shortener uses > 30 chrs		 		
+		          $.getJSON('http://almaer.com/endpoint/resolver.php?callback=?',
+		            {url: link.href},
+		            function(url){		               
+									if (url.lenght > 45) {	//an URL with > 45 chars can break streamies tweet box layout
+										lastAppearance = url.lastIndexOf("/");
+										if (lastAppearance) {
+											url = url.slice(0, lastAppearance); 
+											$(link).text(url);		 		
+					            $(link).attr('href', url);
+										}
+									}									
+		            })		 		
+		         }		 		
+		        });		 		
+		        this();		 		
+		      }		 		
+				}
+				      
+    }  
+
   }
 );
