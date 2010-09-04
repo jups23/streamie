@@ -4,7 +4,7 @@
  */
 
 require.def("stream/linkplugins",
-  ["stream/helpers", "/ext/parseUri.js", "stream/tweet", "stream/status.js", "stream/settings", "stream/twitterRestAPI", "stream/streamplugins.js", "text!../templates/tweet.ejs.html" ],
+  ["stream/helpers", "/ext/parseUri.js", "stream/tweetstream", "stream/tweet", "stream/settings", "stream/streamplugins", "stream/streamplugins", "stream/initplugins", "stream/linkplugins", "stream/settingsDialog", "stream/client", "stream/status", "/ext/underscore.js", "/ext/modernizr-1.5.js", "http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" ],
   function(helpers) {
     
     return {
