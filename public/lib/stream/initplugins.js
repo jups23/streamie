@@ -3,8 +3,15 @@
  */
 
 require.def("stream/initplugins",
-  ["stream/tweet", "stream/twitterRestAPI", "stream/helpers", "text!../templates/tweet.ejs.html"],
-  function(tweetModule, rest, helpers, templateText) {
+  ["stream/tweet", "stream/settings", "stream/twitterRestAPI", "stream/helpers", "text!../templates/tweet.ejs.html"],
+  function(tweetModule, settings, rest, helpers, templateText) {
+    
+    settings.registerNamespace("general", "General");
+    settings.registerKey("general", "showTwitterBackground", "Show background from Twitter",  false);
+    
+    settings.registerNamespace("notifications", "Notifications");
+    settings.registerKey("notifications", "favicon", "Highlight Favicon (Website icon)",  true);
+    settings.registerKey("notifications", "throttle", "Throttle (Only notify once per minute)", false);
     
     return {
       
@@ -20,6 +27,24 @@ require.def("stream/initplugins",
           }
           $(window).bind("hashchange", change); // who cares about old browsers?
           change();
+        }
+      },
+      
+      // change the background to the twitter background
+      background: {
+        name: "background",
+        func: function (stream) {
+          settings.subscribe("general", "showTwitterBackground", function (bool) {
+            if(bool) {
+              stream.userInfo(function (user) {
+                if(user.profile_background_image_url) {
+                  $("body").css("backgroundImage", "url("+user.profile_background_image_url+")")
+                }
+              })
+            } else {
+               $("body").css("backgroundImage", null)
+            }
+          });
         }
       },
       
@@ -49,11 +74,11 @@ require.def("stream/initplugins",
                 mainstatus.addClass("show");
                 mainstatus.find("[name=status]").focus();
               }
-              return;
             }
-            
-            a.closest("#mainnav").find("li").removeClass("active");
-            li.addClass("active")
+            if(li.hasClass("activatable")) { // special case for new tweet
+              a.closest("#mainnav").find("li").removeClass("active");
+              li.addClass("active")
+            }
           });
           
           mainstatus.bind("status:send", function () {
@@ -73,27 +98,56 @@ require.def("stream/initplugins",
           var win = $(window);
           var dirty = win.scrollTop() > 0;
           var newCount = 0;
-          function redraw() { // this should do away
+          
+          function redraw() {
             var signal = newCount > 0 ? "("+newCount+") " : "";
-            document.title = document.title.replace(/^(?:\(\d+\) )*/, signal); 
+            document.title = document.title.replace(/^(?:\(\d+\) )*/, signal);
           }
+          
           win.bind("scroll", function () {
             dirty = win.scrollTop() > 0;
             if(!dirty) { // we scrolled to the top. Back to 0 unread
               newCount = 0;
               setTimeout(function () { // not do this winthin the scroll event. Makes Chrome much happier performance wise.
-                redraw();
-                $(document).trigger("tweet:unread", [newCount])
+                $(document).trigger("notify:tweet:unread", [newCount])
               }, 0);
             }
+          });
+          $(document).bind("notify:tweet:unread", function () {
+            redraw();
           });
           $(document).bind("tweet:new", function () {
             newCount++;
             if(dirty) {
-              redraw()
               $(document).trigger("tweet:unread", [newCount])
             }
           })
+        }
+      },      
+      
+      // tranform "tweet:unread" events into "notify:tweet:unread" events
+      // depending on setting, only fire the latter once a minute
+      throttableNotifactions: {
+        name: "throttableNotifications",
+        func: function () {
+          var notifyCount = null;
+          setInterval(function () {
+            // if throttled, only redraw every N seconds;
+            if(settings.get("notifications", "throttle")) {
+              if(notifyCount != null) {
+                $(document).trigger("notify:tweet:unread", [notifyCount]);
+                notifyCount = null;
+              }
+            }
+          }, 60 * 1000) // turn this into a setting
+          $(document).bind("tweet:unread", function (e, count) {
+            // disable via setting
+            if(settings.get("notifications", "throttle")) {
+              notifyCount = count;
+            } else {
+              $(document).trigger("notify:tweet:unread", [count])
+            }
+          });
         }
       },
       
@@ -166,8 +220,7 @@ require.def("stream/initplugins",
         },
         
         func: function (stream, plugin) {
-          
-          $(document).bind("tweet:unread", function (e, count) {
+          $(document).bind("notify:tweet:unread", function (e, count) {
             var color = "#000000";
             if(count > 0) {
               color = "#278BF5";
@@ -224,8 +277,6 @@ require.def("stream/initplugins",
           prefill(); // do once at start
         }
       }
-      
     }
-      
   }
 );
