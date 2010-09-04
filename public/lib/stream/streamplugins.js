@@ -8,7 +8,8 @@ require.def("stream/streamplugins",
   function(tweetModule, settings, rest, helpers, templateText) {
     
     settings.registerNamespace("stream", "Stream");
-    settings.registerKey("stream", "showRetweets", "Show Retweets",  true);  
+    settings.registerKey("stream", "showRetweets", "Show Retweets",  true);
+    settings.registerKey("stream", "keepScrollState", "Keep scroll level when new tweets come in",  true); 
     
     var template = _.template(templateText);
     
@@ -119,7 +120,13 @@ require.def("stream/streamplugins",
         func: function (tweet, stream, plugin) {
           var id = tweet.data.id;
           var in_reply_to = tweet.data.in_reply_to_status_id;
-          if(Conversations[in_reply_to]) {
+          if(tweet.data._conversation) {
+            tweet.conversation = Conversations[id] = tweet.data._conversation
+          }
+          else if(Conversations[id]) {
+            tweet.conversation = Conversations[id];
+          }
+          else if(Conversations[in_reply_to]) {
             tweet.conversation = Conversations[id] = Conversations[in_reply_to];
           } else {
             tweet.conversation = Conversations[id] = {
@@ -129,6 +136,21 @@ require.def("stream/streamplugins",
               Conversations[in_reply_to] = tweet.conversation;
             }
           }
+          tweet.fetchNotInStream = function (cb) {
+            var in_reply_to = tweet.data.in_reply_to_status_id;
+            if(in_reply_to && !Tweets[in_reply_to]) {
+              rest.get("/1/statuses/show/"+in_reply_to+".json", function (status) {
+                if(status) {
+                  status._after = tweet;
+                  status._conversation = tweet.conversation;
+                  stream.process(tweetModule.make(status));
+                  if(cb) {
+                    cb(status);
+                  }
+                }
+              })
+            }
+          };
           this();
         }
       },
@@ -139,7 +161,13 @@ require.def("stream/streamplugins",
         func: function (tweet, stream) {
           tweet.node = $(tweet.html);
           tweet.node.data("tweet", tweet); // give node access to its tweet
-          stream.canvas().prepend(tweet.node);
+          if(tweet.data._after) {
+            var target = tweet.data._after;
+            target.node.after(tweet.node);
+            tweet.fetchNotInStream();
+          } else {
+            stream.canvas().prepend(tweet.node);
+          }
           this();
         }
       },
@@ -164,6 +192,8 @@ require.def("stream/streamplugins",
         func: function (tweet) {
           tweet.created_at = new Date(tweet.data.created_at);
           function update () {
+
+
             var millis = (new Date()).getTime() - tweet.created_at.getTime();
             tweet.age = millis;
             var units   = {
@@ -186,9 +216,26 @@ require.def("stream/streamplugins",
             };
             
             tweet.node.find(".created_at").text(text);
+            
+			tweet.age = (new Date()).getTime() - tweet.created_at.getTime();
+            var age_str = '';
+            var sec = Math.round(tweet.age / 1000);
+            var minutes = Math.floor(sec/60); sec %= 60;
+            var hours = Math.floor(minutes/60); minutes %= 60;
+            var days = Math.floor(hours/24); hours %= 24;
+            if(days > 1) age_str += days+' days ';
+						if(hours > 1) age_str += hours+' hours ';
+						if(minutes > 1) age_str += minutes+' minutes ';
+						age_str += sec + ' seconds '+'ago';
+            tweet.node.find(".created_at").text(age_str)
+
+            if(tweet.node) {
+              tweet.node.find(".created_at").text(text);
+            }
+
           }
           update();
-          setInterval(update, 5000)
+          setInterval(update, 5000);
           this();
         }
       },
@@ -203,7 +250,7 @@ require.def("stream/streamplugins",
           var GRUBERS_URL_RE = /\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/ig;
 
           text = text.replace(GRUBERS_URL_RE, function(url){
-            return '<a href="'+((/^\w+\:\//.test(url)?'':'http://')+url)+'">'+url+'</a>';
+            return '<a href="'+((/^\w+\:\//.test(url)?'':'http://')+helpers.html(url))+'">'+helpers.html(url)+'</a>';
           })
 					
           // screen names
@@ -217,6 +264,25 @@ require.def("stream/streamplugins",
           
           tweet.textHTML = text;
           
+          this();
+        }
+      },
+      
+      // runs the link plugins defined in app.js on each link
+      executeLinkPlugins: {
+        name: "enhanceLinks",
+        func: function (tweet, stream) {
+          var node = $("<div>"+tweet.textHTML+"</div>");
+          var as = node.find("a");
+          
+          as.each(function () {
+            var a = $(this);
+            stream.linkPlugins.forEach(function (plugin) {
+              plugin.func.call(function () {}, a, tweet, stream, plugin);
+            })
+          })
+          
+          tweet.textHTML = node.html();
           this();
         }
       },
@@ -240,45 +306,20 @@ require.def("stream/streamplugins",
       keepScrollState: {
         name: "keepScrollState",
         func: function (tweet, stream) {
-          if(!tweet.prefill || !tweet.seenBefore) {
-            var win = $(window);
-            var cur = win.scrollTop();
-            var next = tweet.node.next();
-            if(next.length > 0) {
-              var top = cur + next.offset().top - tweet.node.offset().top;
-              win.scrollTop( top );
+          if(settings.get("stream", "keepScrollState")) {
+            if(!tweet.prefill || !tweet.seenBefore) {
+              var win = $(window);
+              var cur = win.scrollTop();
+              var next = tweet.node.next();
+              if(next.length > 0) {
+                var top = cur + next.offset().top - tweet.node.offset().top;
+                win.scrollTop( top );
+              }
             }
           }
           this();
         }
-      },
-			/*unshortens links (based on @antimatter15's commit 1d039504532546f27399)
-				it should be possible to disable this via upcoming preferences*/
-				expandLinks: {
-				  name: 'expandLinks',
-				  func: function (tweet) {
-				    tweet.node.find('.text a').each(function (index, link) {
-				      if (link.href.length < 30 && link.href == $(link).text()) { //assume no shortener uses > 30 chrs
-				        $.getJSON('http://almaer.com/endpoint/resolver.php?callback=?', 
-								{url: link.href}, function (url) {
-				          if (url.length > 45) { //an URL with > 45 chars can break streamies tweet box layout
-				            lastAppearance = url.lastIndexOf("/");
-				            if (lastAppearance < 45 && lastAppearance > 7) { //"http://".length == 7;
-				              url = url.slice(0, lastAppearance); //generate friendlier URLs by slicing afer the last '/'													
-				            }
-				            else {
-				              url = url.slice(0, 45) + "…"; //link to be continued
-				            }
-				          }
-				          $(link).text(url);
-				          $(link).attr('title', link.href); //set title to old one.
-				          $(link).attr('href', url);
-				        })
-				      }
-				    });
-				    this();
-				  }
-				}      
+      }		
     }  
 
   }

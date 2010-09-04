@@ -6,10 +6,12 @@ require.def("stream/initplugins",
   ["stream/tweet", "stream/settings", "stream/twitterRestAPI", "stream/helpers", "text!../templates/tweet.ejs.html"],
   function(tweetModule, settings, rest, helpers, templateText) {
     
-    settings.registerNamespace("notifications", "Notifications");
-    settings.registerKey("notifications", "favicon", "Favicon",  true);
-    settings.registerKey("notifications", "throttle", "Throttle (Only notify once per minute)", false);
+    settings.registerNamespace("general", "General");
+    settings.registerKey("general", "showTwitterBackground", "Show background from Twitter",  false);
     
+    settings.registerNamespace("notifications", "Notifications");
+    settings.registerKey("notifications", "favicon", "Highlight Favicon (Website icon)",  true);
+    settings.registerKey("notifications", "throttle", "Throttle (Only notify once per minute)", false);
     
     return {
       
@@ -25,6 +27,24 @@ require.def("stream/initplugins",
           }
           $(window).bind("hashchange", change); // who cares about old browsers?
           change();
+        }
+      },
+      
+      // change the background to the twitter background
+      background: {
+        name: "background",
+        func: function (stream) {
+          settings.subscribe("general", "showTwitterBackground", function (bool) {
+            if(bool) {
+              stream.userInfo(function (user) {
+                if(user.profile_background_image_url) {
+                  $("body").css("backgroundImage", "url("+user.profile_background_image_url+")")
+                }
+              })
+            } else {
+               $("body").css("backgroundImage", null)
+            }
+          });
         }
       },
       
@@ -54,11 +74,11 @@ require.def("stream/initplugins",
                 mainstatus.addClass("show");
                 mainstatus.find("[name=status]").focus();
               }
-              return;
             }
-            
-            a.closest("#mainnav").find("li").removeClass("active");
-            li.addClass("active")
+            if(li.hasClass("activatable")) { // special case for new tweet
+              a.closest("#mainnav").find("li").removeClass("active");
+              li.addClass("active")
+            }
           });
           
           mainstatus.bind("status:send", function () {
