@@ -51,12 +51,11 @@ require.def("stream/linkplugins",
 		/*unshortens links (based on @antimatter15's commit 1d039504532546f27399)
 		it should be possible to disable this via preferences*/
 		expandLinks: {
-		  func: function (tweet) {
-			console.log(tweet);
-			tweet.node.find('.text a').each(function (index, link) {
-		      if (link.href.length < 30 && link.href == $(link).text()) { 	//assume no shortener uses > 30 chrs
+		  func: function (longLink) {
+		    console.log(longLink);
+			if (longLink.href.length < 30 && longLink.href == $(longLink).text()) { 	//assume no shortener uses > 30 chrs
 		        $.getJSON('http://almaer.com/endpoint/resolver.php?callback=?', 
-						{url: link.href}, function (url) {
+						{url: longLink.href}, function (url) {
 		          if (url.length > 45) { 	//an URL with > 45 chars can break streamies tweet box layout
 		            lastAppearance = url.lastIndexOf("/");
 		            if (lastAppearance < 45 && lastAppearance > 7) { 	//"http://".length == 7;
@@ -66,11 +65,10 @@ require.def("stream/linkplugins",
 		              url = url.slice(0, 45) + "…"; 	//link to be continued
 		            }
 		          }
-		          $(link).text(url);
-		          $(link).attr('href', url);
+		          $(longLink).text(url);
+		          $(longLink).attr('href', url);
 		        })
 		      }
-		    });
 		    this();
 		  }
 		}
