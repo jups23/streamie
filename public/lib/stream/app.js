@@ -57,6 +57,7 @@ require.def("stream/app",
       status.retweet,
       status.favorite,
       status.conversation,
+      status.autocomplete,
       status.showJSON,
       settingsDialog.init
     ];
@@ -65,7 +66,7 @@ require.def("stream/app",
     // they perform actions such as previewing images or expading short URLs
     var linkPlugins = [
       linkPlugin.imagePreview,
-      linkPlugin.expandLinks
+	  //linkPLugin.expandLinks not working yet
     ];
     
     var stream = new tweetstream.Stream(settings);
@@ -90,6 +91,9 @@ require.def("stream/app",
             else if(data.action == "auth_ok") {
               $("#about").hide();
               $("#header").show();
+   			  $(document).bind("tweet:first", function () {
+              $("#content .logo").hide();
+              });
               // we are now connected and authorization was fine
               stream.user = data.info; // store the info of the logged user
               if(initial) {

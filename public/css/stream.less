@@ -1,11 +1,22 @@
 #content{
 	#stream{
 		height:100%;
+<<<<<<< HEAD
 		li{
+=======
+		li.tweet{
+>>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
 			position:relative;
 			clear:both;
 			margin:0 0 20px 0;
 			#client-transition-time > .short;
+<<<<<<< HEAD
+=======
+			z-index: 0;
+			&:hover{
+				z-index:1;
+			}
+>>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
 			&.new{
 				-webkit-animation-name: fadein;
 				-webkit-animation-duration: 2s;
@@ -65,11 +76,28 @@
 						display:inline-block;
 						width:70px;
 					}
+<<<<<<< HEAD
 					img{
 						height: 12px;
 						#client-transition-time > .short;
 						&:hover{
 							height:150px;
+=======
+					
+					.image-preview{
+						position:relative;
+						width:10px;
+						overflow:hidden;
+						img{
+							height: 12px;
+						}
+						&:hover{
+							img{
+								z-index:1;
+								position:absolute;
+								height:150px;
+							}
+>>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
 						}
 					}
 				}

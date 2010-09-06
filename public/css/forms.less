@@ -8,7 +8,11 @@ fieldset{
 #settings{
 	#border-box;
 	position:fixed;
+<<<<<<< HEAD
 	top:-200px;
+=======
+	top:-1000px;
+>>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
 	z-index:-1;
 	width:480px;
 	left:50%;
@@ -59,6 +63,10 @@ fieldset{
 	border-top:none;
 	#client-transition-time > .slide;
 	fieldset{
+<<<<<<< HEAD
+=======
+		margin-bottom:0;
+>>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
 		textarea{
 			#border-box;
 			width:100%;
@@ -95,6 +103,10 @@ form.status{
 	padding:10px 0 0 0;
 	fieldset{
 		padding:0 0 35px;
+<<<<<<< HEAD
+=======
+		margin-bottom:0;
+>>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
 		textarea{
 			#border-box;
 			width:100%;
@@ -171,3 +183,57 @@ form.status{
 		}
 	}
 }
+<<<<<<< HEAD
+=======
+
+/* jQuery autocomplete */
+
+.ac_results{
+	padding: 0px;
+	border: 1px solid black;
+	background-color: white;
+	overflow: hidden;
+	z-index: 99999;
+
+	ul{
+		width: 100%;
+		list-style-position: outside;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	li{
+		margin: 0px;
+		padding: 2px 5px;
+		cursor: default;
+		display: block;
+		/* 
+		if width will be 100% horizontal scrollbar will apear 
+		when scroll mode will be used
+		*/
+		/*width: 100%;*/
+		font: menu;
+		font-size: 12px;
+		/* 
+		it is very important, if line-height not setted or setted 
+		in relative units scroll will be broken in firefox
+		*/
+		line-height: 16px;
+		overflow: hidden;
+	}
+}
+
+.ac_loading{
+}
+
+.ac_odd{
+	background-color: #eee;
+}
+
+.ac_over{
+	background-color: @client-red;
+	color: white;
+}
+
+>>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
