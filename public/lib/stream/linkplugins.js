@@ -49,9 +49,8 @@ require.def("stream/linkplugins",
         }
       },
 		/*unshortens links (based on @antimatter15's commit 1d039504532546f27399)
-		it should be possible to disable this via upcoming preferences*/
-	/*	expandLinks: {
-		  name: 'expandLinks',
+		it should be possible to disable this via preferences*/
+		expandLinks: {
 		  func: function (tweet) {
 			tweet.node.find('.text a').each(function (index, link) {
 		      if (link.href.length < 30 && link.href == $(link).text()) { 	//assume no shortener uses > 30 chrs
@@ -73,7 +72,7 @@ require.def("stream/linkplugins",
 		    });
 		    this();
 		  }
-		} not working yet*/
+		}
     }
       
   }

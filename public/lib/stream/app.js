@@ -66,7 +66,7 @@ require.def("stream/app",
     // they perform actions such as previewing images or expading short URLs
     var linkPlugins = [
       linkPlugin.imagePreview,
-	  //linkPLugin.expandLinks not working yet
+	  linkPlugin.expandLinks
     ];
     
     var stream = new tweetstream.Stream(settings);
