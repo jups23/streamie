@@ -49,14 +49,13 @@ require.def("stream/linkplugins",
         }
       },
 		/*unshortens links (based on @antimatter15's commit 1d039504532546f27399)
-		it should be possible to disable this via preferences*/
+		it should be possible to en/disable this via preferences*/
 		expandLinks: {
-		  func: function (longLink) {
-		    console.log(longLink);
-			if (longLink.href.length < 30 && longLink.href == $(longLink).text()) { 	//assume no shortener uses > 30 chrs
+		  func: function (shortLink) {
+			if (shortLink.context.href.length < 30 && shortLink.context.hostname !="twitter.com") {
 		        $.getJSON('http://almaer.com/endpoint/resolver.php?callback=?', 
-						{url: longLink.href}, function (url) {
-		          if (url.length > 45) { 	//an URL with > 45 chars can break streamies tweet box layout
+						{url: shortLink.context.href}, function (url) {
+		          if (url.length > 45) { 	//an URL with > 45 chars can break streamies tweet box layout, 45 is chosen randomly
 		            lastAppearance = url.lastIndexOf("/");
 		            if (lastAppearance < 45 && lastAppearance > 7) { 	//"http://".length == 7;
 		              url = url.slice(0, lastAppearance+1) + "…"; 	//generate friendlier URLs by slicing afer the last '/'													
@@ -65,14 +64,17 @@ require.def("stream/linkplugins",
 		              url = url.slice(0, 45) + "…"; 	//link to be continued
 		            }
 		          }
-		          $(longLink).text(url);
-		          $(longLink).attr('href', url);
+				console.log(shortLink);
+				$(shortLink).text("foo bar");	//neither this
+				$(shortLink).attr("href", url);	//nor that works
+				console.log(shortLink);			
 		        })
+		     	//shortLink.text("bar"); //works only in this scope, but var url (unshortened shortLink) is not available	
 		      }
 		    this();
 		  }
 		}
     }
-      
+
   }
 );
