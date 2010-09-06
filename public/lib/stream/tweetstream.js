@@ -29,12 +29,27 @@ require.def("stream/tweetstream",
         this.linkPlugins.push.apply(this.linkPlugins, plugins);
       },
       
+<<<<<<< HEAD
+=======
+      // sets or returns the newest tweet ever seen
+      newestTweet: function (newID) {
+        if(newID) {
+          window.localStorage.newestTweet = newID
+        }
+        return parseInt(window.localStorage.newestTweet || 0, 10);
+      },
+      
+>>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
       // this is where we draw
       canvas: function () {
         return $("#stream")
       },
       
       // Get the full info for the current user. See http://apiwiki.twitter.com/Twitter-REST-API-Method:-users%C2%A0show
+<<<<<<< HEAD
+=======
+      // the callback "cb" will receive the data. The API call is cache after the first call
+>>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
       userInfo: function (cb) {
         if(this.__userInfo) {
           var user = this.__userInfo;
@@ -64,11 +79,14 @@ require.def("stream/tweetstream",
         function next () {
           var plugin = self.plugins[i++];
           if(plugin) {
+            plugin.func.displayName = plugin.name;
             plugin.func.call(next, tweet, self, plugin)
           }
         }
         next();
-      }
+      },
+      
+      count: 0 // count is incremented in the streamplugin/tweetsOnly
     };
     
     return {
