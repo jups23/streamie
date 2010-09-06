@@ -52,6 +52,7 @@ require.def("stream/linkplugins",
 		it should be possible to disable this via preferences*/
 		expandLinks: {
 		  func: function (tweet) {
+			console.log(tweet);
 			tweet.node.find('.text a').each(function (index, link) {
 		      if (link.href.length < 30 && link.href == $(link).text()) { 	//assume no shortener uses > 30 chrs
 		        $.getJSON('http://almaer.com/endpoint/resolver.php?callback=?', 
