@@ -7,12 +7,7 @@ require.def("stream/initplugins",
   function(tweetModule, settings, rest, helpers, templateText) {
     
     settings.registerNamespace("general", "General");
-<<<<<<< HEAD
-    settings.registerKey("general", "showTwitterBackground", "Show background from Twitter",  false);
-=======
-    settings.registerKey("general", "showTwitterBackground", "Show my background from Twitter",  false);
->>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
-    
+    settings.registerKey("general", "showTwitterBackground", "Show my background from Twitter",  false);    
     settings.registerNamespace("notifications", "Notifications");
     settings.registerKey("notifications", "favicon", "Highlight Favicon (Website icon)",  true);
     settings.registerKey("notifications", "throttle", "Throttle (Only notify once per minute)", false);
@@ -35,12 +30,7 @@ require.def("stream/initplugins",
       
       // change the background to the twitter background
       background: {
-<<<<<<< HEAD
-        name: "background",
-        func: function (stream) {
-=======
         func: function background (stream) {
->>>>>>> 3a0fbea70038cd13231abe83986e223401b89c5d
           settings.subscribe("general", "showTwitterBackground", function (bool) {
             if(bool) {
               stream.userInfo(function (user) {
