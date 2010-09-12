@@ -261,7 +261,10 @@ require.def("stream/streamplugins",
           
           as.each(function () {
             var a = $(this);
-            stream.linkPlugins.forEach(function (plugin) {
+						if (a.context.href.length < 30 && shortLink.context.hostname !="twitter.com") {
+							$(a).attr("class","unshortMe");
+						};
+            stream.linkPlugins.forEach(function (plugin) {	//TODO: only call unshortening plugin if class == unshortMe
               plugin.func.call(function () {}, a, tweet, stream, plugin);
             })
           })

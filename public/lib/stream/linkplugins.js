@@ -48,32 +48,39 @@ require.def("stream/linkplugins",
           }
         }
       },
-		/*unshortens links (based on @antimatter15's commit 1d039504532546f27399)
-		it should be possible to en/disable this via preferences*/
-		expandLinks: {
-		  func: function (shortLink) {
-			if (shortLink.context.href.length < 30 && shortLink.context.hostname !="twitter.com") {
-		        $.getJSON('http://almaer.com/endpoint/resolver.php?callback=?', 
-						{url: shortLink.context.href}, function (url) {
-		          if (url.length > 45) { 	//an URL with > 45 chars can break streamies tweet box layout, 45 is chosen randomly
-		            lastAppearance = url.lastIndexOf("/");
-		            if (lastAppearance < 45 && lastAppearance > 7) { 	//"http://".length == 7;
-		              url = url.slice(0, lastAppearance+1) + "…"; 	//generate friendlier URLs by slicing afer the last '/'													
-		            }
-		            else {
-		              url = url.slice(0, 45) + "…"; 	//link to be continued
-		            }
-		          }
-				console.log(shortLink);
-				$(shortLink).text("foo bar");	//neither this
-				$(shortLink).attr("href", url);	//nor that works
-				console.log(shortLink);			
-		        })
-		     	//shortLink.text("bar"); //works only in this scope, but var url (unshortened shortLink) is not available	
-		      }
-		    this();
-		  }
-		}
+			/*unshortens links (based on @antimatter15's commit 1d039504532546f27399)
+			it should be possible to en/disable this via preferences*/
+			expandLinks: {
+			  func: function (shortLink) {	//starts with link at bottom
+				var longLinks = new Array();
+				//if (shortLink.context.href.length < 30 && shortLink.context.hostname !="twitter.com") { if logic done in streamplugins.js
+			        $.getJSON('http://almaer.com/endpoint/resolver.php?callback=?', 
+							{url: shortLink.context.href}, function (url) {
+			          //$(shortLink).attr("class", "unshortMe");	//mark them for later rewriting
+								
+								if (url.length > 45) { 	//an URL with > 45 chars can break streamies tweet box layout, 45 is chosen randomly
+			            lastAppearance = url.lastIndexOf("/");
+			            if (lastAppearance < 45 && lastAppearance > 7) { 	//"http://".length == 7;
+			              url = url.slice(0, lastAppearance+1) + "…"; 	//generate friendlier URLs by slicing afer the last '/'													
+			            }
+			            else {
+			              url = url.slice(0, 45) + "…"; 	//link to be continued
+			            }
+			          }
+								longLinks.push(url);	
+								console.log(longLinks);	
+			        })
+							
+				//}	
+				//shortLink.text("bar"); //works only in this scope, but var url (unshortened shortLink) is not available	
+			  $("a.unshortMe").each( function (i) {		  
+					$(this).text(longLinks[i]);	//works with arbitrary string but array is not ready yet
+					//TODO: Make it asynchron + solve the problem that API results doesn't arrive in the right order 
+					console.log($(this));
+				})   
+			  this();
+			  }
+			}
     }
 
   }
